@@ -206,7 +206,7 @@ module ActiveRecord::Extensions
   class Comparison
 
     SUFFIX_MAP = { 'eq'=>'=', 'lt'=>'<', 'lte'=>'<=', 'gt'=>'>', 'gte'=>'>=', 'ne'=>'!=', 'not'=>'!=' }
-    ACCEPTABLE_COMPARISONS = [ String, Numeric, Time, DateTime, Date ]
+    ACCEPTABLE_COMPARISONS = [ String, Numeric, Time, DateTime ]
     
     def self.process( key, val, caller )
       process_without_suffix( key, val, caller ) || process_with_suffix( key, val, caller )
@@ -256,7 +256,15 @@ module ActiveRecord::Extensions
     STARTS_WITH_RGX = /(.+)_starts_with$/
     ENDS_WITH_RGX =  /(.+)_ends_with$/
     def self.process( key, val, caller )
-      values = [*val]
+      values = case val
+        when NilClass
+          []
+        when Array
+          val
+        else
+          [val]
+        end
+
       case key.to_s
       when LIKE_RGX
         str = values.collect do |v|
